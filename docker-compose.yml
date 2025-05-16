@@ -1,21 +1,23 @@
 ---
 services:
   bc-redis-cache:
+    network_mode: host
     image: redis:8.0.1
     env_file:
       - path: .env
         required: true
     container_name: bc-redis-cache
-    ports: [6379:6379]
+    ports: [10.0.0.1:6379:6379]
     command:
       - redis-server
+      - --bind
+      - 10.0.0.11
       - --requirepass
       - ${REDIS_CACHE_PASSWORD}
       - --databases
       - '1'
       - --maxmemory
       - ${REDIS_MAX_MEMORY}
-    networks: [backend]
     healthcheck:
       test: [CMD, redis-cli, -p, '6379', ping]
       interval: 10s
@@ -23,26 +25,25 @@ services:
       retries: 10
       start_period: 10s
   bc-redis-queue:
+    network_mode: host
     image: redis:8.0.1
     env_file:
       - path: .env
         required: true
     container_name: bc-redis-queue
-    ports: [6380:6379]
     command:
       - redis-server
+      - --bind
+      - 10.0.0.12
       - --requirepass
       - ${REDIS_QUEUE_PASSWORD}
       - --databases
       - '1'
       - --maxmemory
       - ${REDIS_MAX_MEMORY}
-    networks: [backend]
     healthcheck:
       test: [CMD, redis-cli, -p, '6379', ping]
       interval: 10s
       timeout: 3s
       retries: 10
       start_period: 10s
-networks:
-  backend:
